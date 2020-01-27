@@ -25,4 +25,4 @@ A simple spigot plugin which allows whitelisting through a discord text channel.
 ### Set Up:
 
 Config file is located at: (server-root)/plugins/DiscordWhitelister - this needs a valid bot token and valid channel ids to work.
-To create a Discord application and/or find your discord bot token, follow this link: https://discordapp.com/developers/applications/
+To create a Discord application and/or find your discord bot token, follow this link: <https://discordapp.com/developers/applications/>

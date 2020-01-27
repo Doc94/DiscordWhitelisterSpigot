@@ -26,11 +26,17 @@ import java.util.Objects;
 // handles Discord interaction
 public class DiscordClient extends ListenerAdapter
 {
+
+    public static JDA jdaInstance;
+
+    public static DiscordClient discordClient;
+
     static String[] allowedToAddRemoveRoles;
     static String[] allowedToAddRoles;
     static String[] allowedToAddLimitedRoles;
 
     private static String[] targetTextChannels;
+    private static String sanctionChannel;
 
     private static MessageEmbed botInfo;
     private static MessageEmbed addCommandInfo;
@@ -49,13 +55,15 @@ public class DiscordClient extends ListenerAdapter
         AssignVars();
         BuildStrings();
 
+        discordClient = new DiscordClient();
+
         try
         {
             JDA javaDiscordAPI = new JDABuilder(AccountType.BOT)
                     .setToken(clientToken)
-                    .addEventListeners(new DiscordClient())
+                    .addEventListeners(discordClient)
                     .build();
-            javaDiscordAPI.awaitReady();
+            jdaInstance = javaDiscordAPI.awaitReady();
             return 0;
         }
         catch(LoginException | InterruptedException e)
@@ -73,6 +81,8 @@ public class DiscordClient extends ListenerAdapter
         {
             targetTextChannels[i] = DiscordWhitelister.getWhitelisterBotConfig().getList("target-text-channels").get(i).toString();
         }
+
+        sanctionChannel = DiscordWhitelister.getWhitelisterBotConfig().getString("target-sanction-text-channel");
 
         maxWhitelistAmount = DiscordWhitelister.getWhitelisterBotConfig().getInt("max-whitelist-amount");
         limitedWhitelistEnabled = DiscordWhitelister.getWhitelisterBotConfig().getBoolean("limited-whitelist-enabled");
@@ -102,6 +112,70 @@ public class DiscordClient extends ListenerAdapter
                 "If you encounter any issues, please report them here: https://github.com/JoeShimell/DiscordWhitelisterSpigot/issues"), false);
         embedBuilderInfo.setColor(new Color(104, 109, 224));
         removeCommandInfo = embedBuilderInfo.build();
+    }
+
+    public static Guild getGuild() {
+        return jdaInstance.getGuilds().get(0);
+    }
+
+    public static void sendFurroProtect(String username, String reason) {
+        if(sanctionChannel == null || sanctionChannel.isEmpty()) {
+            return;
+        }
+
+        if(reason == null || reason.isEmpty()) {
+            reason = "Sin Razon";
+        }
+
+        TextChannel channel = getGuild().getTextChannelById(sanctionChannel);
+
+        if(channel == null) {
+            return;
+        }
+
+        String message = ":rabbit: FurroProtect\n".concat("User: " + username).concat("\n").concat("Razon: ").concat(reason);
+
+        channel.sendMessage(message).queue();
+    }
+
+    public static void sendKick(String username, String reason) {
+        if(sanctionChannel == null || sanctionChannel.isEmpty()) {
+            return;
+        }
+
+        if(reason == null || reason.isEmpty()) {
+            reason = "Sin Razon";
+        }
+
+        TextChannel channel = getGuild().getTextChannelById(sanctionChannel);
+
+        if(channel == null) {
+            return;
+        }
+
+        String message = ":boot: KICK\n".concat("User: " + username).concat("\n").concat("Razon: ").concat(reason);
+
+        channel.sendMessage(message).queue();
+    }
+
+    public static void sendBan(String username, String reason) {
+        if(sanctionChannel == null || sanctionChannel.isEmpty()) {
+            return;
+        }
+
+        if(reason == null || reason.isEmpty()) {
+            reason = "Sin Razon";
+        }
+
+        TextChannel channel = getGuild().getTextChannelById(sanctionChannel);
+
+        if(channel == null) {
+            return;
+        }
+
+        String message = ":pick: BAN\n".concat("User: " + username).concat("\n").concat("Razon: ").concat(reason);
+
+        channel.sendMessage(message).queue();
     }
 
     @Override

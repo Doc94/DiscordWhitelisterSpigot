@@ -1,5 +1,6 @@
 package uk.co.angrybee.joe;
 
+import org.bukkit.Bukkit;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -42,6 +43,8 @@ public class DiscordWhitelister extends JavaPlugin
         whitelisterBotConfig = new YamlConfiguration();
         userList = new YamlConfiguration();
         removedList = new YamlConfiguration();
+
+        Bukkit.getServer().getPluginManager().registerEvents(new SanctionListener(),this);
 
         ConfigSetup();
 
@@ -109,6 +112,13 @@ public class DiscordWhitelister extends JavaPlugin
                 getLogger().severe("Discord Client failed to initialize, please check if your config file is valid.");
             }
         }
+    }
+
+    @Override
+    public void onDisable() {
+        getLogger().info("Bot is shutdown...");
+        DiscordClient.jdaInstance.removeEventListener(DiscordClient.discordClient);
+        DiscordClient.jdaInstance.shutdownNow();
     }
 
     public static JavaPlugin getPlugin()
@@ -325,6 +335,16 @@ public class DiscordWhitelister extends JavaPlugin
                 if(!configCreated)
                 {
                     getPlugin().getLogger().warning("Entry 'target-text-channels' was not found, adding it to the config...");
+                }
+            }
+
+            if(getWhitelisterBotConfig().get("target-sanction-text-channel") == null)
+            {
+                getWhitelisterBotConfig().set("target-sanction-text-channel", "0");
+
+                if(!configCreated)
+                {
+                    getPlugin().getLogger().warning("Entry 'target-sanction-text-channel' was not found, adding it to the config...");
                 }
             }
 
